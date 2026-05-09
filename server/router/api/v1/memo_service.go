@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/usememos/memos/internal/httpgetter"
@@ -36,6 +37,37 @@ func withSuppressSSE(ctx context.Context) context.Context {
 func isSSESuppressed(ctx context.Context) bool {
 	v, ok := ctx.Value(suppressSSEKey{}).(bool)
 	return ok && v
+}
+
+func (s *APIV1Service) checkMemoReadAccess(ctx context.Context, memo *store.Memo) error {
+	if memo == nil {
+		return status.Errorf(codes.NotFound, "memo not found")
+	}
+
+	// Archived memos are only visible to their creator.
+	if memo.RowStatus == store.Archived {
+		user, err := s.fetchCurrentUser(ctx)
+		if err != nil {
+			return status.Errorf(codes.Internal, "failed to get user")
+		}
+		if user == nil || memo.CreatorID != user.ID {
+			return status.Errorf(codes.NotFound, "memo not found")
+		}
+	}
+
+	if memo.Visibility != store.Public {
+		user, err := s.fetchCurrentUser(ctx)
+		if err != nil {
+			return status.Errorf(codes.Internal, "failed to get user")
+		}
+		if user == nil {
+			return status.Errorf(codes.Unauthenticated, "user not authenticated")
+		}
+		if memo.Visibility == store.Private && memo.CreatorID != user.ID {
+			return status.Errorf(codes.PermissionDenied, "permission denied")
+		}
+	}
+	return nil
 }
 
 func (s *APIV1Service) CreateMemo(ctx context.Context, request *v1pb.CreateMemoRequest) (*v1pb.Memo, error) {
@@ -335,27 +367,19 @@ func (s *APIV1Service) GetMemo(ctx context.Context, request *v1pb.GetMemoRequest
 		return nil, status.Errorf(codes.NotFound, "memo not found")
 	}
 
-	// Archived memos are only visible to their creator.
-	if memo.RowStatus == store.Archived {
-		user, err := s.fetchCurrentUser(ctx)
+	if err := s.checkMemoReadAccess(ctx, memo); err != nil {
+		return nil, err
+	}
+	if memo.ParentUID != nil {
+		parentMemo, err := s.Store.GetMemo(ctx, &store.FindMemo{UID: memo.ParentUID})
 		if err != nil {
-			return nil, status.Errorf(codes.Internal, "failed to get user")
+			return nil, status.Errorf(codes.Internal, "failed to get parent memo")
 		}
-		if user == nil || memo.CreatorID != user.ID {
+		if parentMemo == nil {
 			return nil, status.Errorf(codes.NotFound, "memo not found")
 		}
-	}
-
-	if memo.Visibility != store.Public {
-		user, err := s.fetchCurrentUser(ctx)
-		if err != nil {
-			return nil, status.Errorf(codes.Internal, "failed to get user")
-		}
-		if user == nil {
-			return nil, status.Errorf(codes.Unauthenticated, "user not authenticated")
-		}
-		if memo.Visibility == store.Private && memo.CreatorID != user.ID {
-			return nil, status.Errorf(codes.PermissionDenied, "permission denied")
+		if err := s.checkMemoReadAccess(ctx, parentMemo); err != nil {
+			return nil, err
 		}
 	}
 
@@ -486,6 +510,16 @@ func (s *APIV1Service) UpdateMemo(ctx context.Context, request *v1pb.UpdateMemoR
 			update.Payload = memo.Payload
 		} else if path == "visibility" {
 			visibility := convertVisibilityToStore(request.Memo.Visibility)
+			if memo.ParentUID != nil {
+				parentMemo, err := s.Store.GetMemo(ctx, &store.FindMemo{UID: memo.ParentUID})
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "failed to get parent memo")
+				}
+				if parentMemo == nil {
+					return nil, status.Errorf(codes.NotFound, "memo not found")
+				}
+				visibility = parentMemo.Visibility
+			}
 			update.Visibility = &visibility
 		} else if path == "pinned" {
 			update.Pinned = &request.Memo.Pinned
@@ -641,11 +675,20 @@ func (s *APIV1Service) CreateMemoComment(ctx context.Context, request *v1pb.Crea
 	if relatedMemo.Visibility == store.Private && relatedMemo.CreatorID != user.ID && !isSuperUser(user) {
 		return nil, status.Errorf(codes.PermissionDenied, "permission denied")
 	}
+	if request.Comment == nil {
+		return nil, status.Errorf(codes.InvalidArgument, "comment is required")
+	}
+
+	comment, ok := proto.Clone(request.Comment).(*v1pb.Memo)
+	if !ok {
+		return nil, status.Errorf(codes.Internal, "failed to clone memo comment")
+	}
+	comment.Visibility = convertVisibilityFromStore(relatedMemo.Visibility)
 
 	// Create the memo comment first; suppress the generic memo.created SSE event
 	// since CreateMemoComment broadcasts memo.comment.created for the parent instead.
 	memoComment, err := s.CreateMemo(withSuppressMentionNotifications(withSuppressSSE(ctx)), &v1pb.CreateMemoRequest{
-		Memo:   request.Comment,
+		Memo:   comment,
 		MemoId: request.CommentId,
 	})
 	if err != nil {
@@ -721,6 +764,12 @@ func (s *APIV1Service) ListMemoComments(ctx context.Context, request *v1pb.ListM
 	memo, err := s.Store.GetMemo(ctx, &store.FindMemo{UID: &memoUID})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get memo")
+	}
+	if memo == nil {
+		return nil, status.Errorf(codes.NotFound, "memo not found")
+	}
+	if err := s.checkMemoReadAccess(ctx, memo); err != nil {
+		return nil, err
 	}
 
 	currentUser, err := s.fetchCurrentUser(ctx)
