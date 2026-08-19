@@ -10,7 +10,6 @@ import (
 	"image"
 	"image/color"
 	"image/png"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -88,6 +87,17 @@ func TestServeAttachmentFile_S3(t *testing.T) {
 	require.Equal(t, http.StatusOK, recorder.Code)
 	require.Equal(t, content, recorder.Body.Bytes())
 	require.Equal(t, "text/plain; charset=utf-8", recorder.Header().Get(echo.HeaderContentType))
+
+	// S3 cannot produce multipart range responses. The fileserver may ignore a
+	// Range request and send the complete representation instead of forwarding
+	// a request the backend rejects.
+	multiRangeRequest := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/file/%s/%s", attachment.Name, attachment.Filename), nil)
+	multiRangeRequest.Header.Set("Range", "bytes=0-2,5-7")
+	multiRangeRecorder := httptest.NewRecorder()
+	e.ServeHTTP(multiRangeRecorder, multiRangeRequest)
+	require.Equal(t, http.StatusOK, multiRangeRecorder.Code)
+	require.Equal(t, content, multiRangeRecorder.Body.Bytes())
+	require.Empty(t, multiRangeRecorder.Header().Get("Content-Range"))
 }
 
 func TestServeAttachmentFile_S3MinIO(t *testing.T) {
@@ -149,7 +159,7 @@ func TestServeAttachmentFile_S3MinIO(t *testing.T) {
 	textURL := fmt.Sprintf("/file/%s/%s", textAttachment.Name, textAttachment.Filename)
 
 	// Authorization happens before storage resolution, so a private instance
-	// must not expose either object bytes or a presigned URL.
+	// must not expose object bytes.
 	fs.Profile.InstanceURL = ""
 	privateRecorder := httptest.NewRecorder()
 	e.ServeHTTP(privateRecorder, httptest.NewRequest(http.MethodGet, textURL, nil))
@@ -180,23 +190,30 @@ func TestServeAttachmentFile_S3MinIO(t *testing.T) {
 	require.Equal(t, http.StatusOK, legacyRecorder.Code)
 	require.Equal(t, textContent, legacyRecorder.Body.Bytes())
 
+	// Media is proxied through the server instead of redirecting to a
+	// presigned URL, with the Range header forwarded for seeking.
 	videoURL := fmt.Sprintf("/file/%s/%s", videoAttachment.Name, videoAttachment.Filename)
 	videoRecorder := httptest.NewRecorder()
 	e.ServeHTTP(videoRecorder, httptest.NewRequest(http.MethodGet, videoURL, nil))
-	require.Equal(t, http.StatusTemporaryRedirect, videoRecorder.Code)
-	presignedURL := videoRecorder.Header().Get(echo.HeaderLocation)
-	require.Contains(t, presignedURL, "X-Amz-Signature=")
+	require.Equal(t, http.StatusOK, videoRecorder.Code)
+	require.Equal(t, videoContent, videoRecorder.Body.Bytes())
+	require.Equal(t, "bytes", videoRecorder.Header().Get("Accept-Ranges"))
+	require.Equal(t, fmt.Sprintf("%d", len(videoContent)), videoRecorder.Header().Get(echo.HeaderContentLength))
 
-	rangeRequest, err := http.NewRequestWithContext(ctx, http.MethodGet, presignedURL, nil)
-	require.NoError(t, err)
+	rangeRecorder := httptest.NewRecorder()
+	rangeRequest := httptest.NewRequest(http.MethodGet, videoURL, nil)
 	rangeRequest.Header.Set("Range", "bytes=4-7")
-	rangeResponse, err := http.DefaultClient.Do(rangeRequest)
-	require.NoError(t, err)
-	defer rangeResponse.Body.Close()
-	require.Equal(t, http.StatusPartialContent, rangeResponse.StatusCode)
-	rangeContent, err := io.ReadAll(rangeResponse.Body)
-	require.NoError(t, err)
-	require.Equal(t, []byte("4567"), rangeContent)
+	e.ServeHTTP(rangeRecorder, rangeRequest)
+	require.Equal(t, http.StatusPartialContent, rangeRecorder.Code)
+	require.Equal(t, []byte("4567"), rangeRecorder.Body.Bytes())
+	require.Equal(t, fmt.Sprintf("bytes 4-7/%d", len(videoContent)), rangeRecorder.Header().Get("Content-Range"))
+
+	invalidRangeRecorder := httptest.NewRecorder()
+	invalidRangeRequest := httptest.NewRequest(http.MethodGet, videoURL, nil)
+	invalidRangeRequest.Header.Set("Range", fmt.Sprintf("bytes=%d-", len(videoContent)*2))
+	e.ServeHTTP(invalidRangeRecorder, invalidRangeRequest)
+	require.Equal(t, http.StatusRequestedRangeNotSatisfiable, invalidRangeRecorder.Code)
+	require.Equal(t, fmt.Sprintf("bytes */%d", len(videoContent)), invalidRangeRecorder.Header().Get("Content-Range"))
 }
 
 func TestServeAttachmentFile_ShareTokenAllowsDirectMemoAttachment(t *testing.T) {
@@ -597,46 +614,35 @@ func TestServeAttachmentFile_ThumbnailWithSensitiveMetadataServesOriginal(t *tes
 
 func TestHasThumbnailSensitiveMetadata(t *testing.T) {
 	tests := []struct {
-		name     string
-		mimeType string
-		data     []byte
-		want     bool
+		name string
+		data []byte
+		want bool
 	}{
 		{
-			name:     "jpeg hdr gain map",
-			mimeType: "image/jpeg",
-			data:     []byte("xmp hdrgm:Version=\"1.0\""),
-			want:     true,
+			name: "jpeg hdr gain map",
+			data: []byte("xmp hdrgm:Version=\"1.0\""),
+			want: true,
 		},
 		{
-			name:     "jpeg icc profile",
-			mimeType: "image/jpeg",
-			data:     []byte("ICC_PROFILE"),
-			want:     true,
+			name: "jpeg icc profile",
+			data: []byte("ICC_PROFILE"),
+			want: true,
 		},
 		{
-			name:     "png cicp chunk",
-			mimeType: "image/png",
-			data:     []byte("cICP"),
-			want:     true,
+			name: "png cicp chunk",
+			data: []byte("cICP"),
+			want: true,
 		},
 		{
-			name:     "heic",
-			mimeType: "image/heic",
-			data:     nil,
-			want:     true,
-		},
-		{
-			name:     "plain jpeg",
-			mimeType: "image/jpeg",
-			data:     []byte("plain image data"),
-			want:     false,
+			name: "plain jpeg",
+			data: []byte("plain image data"),
+			want: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			require.Equal(t, tt.want, hasThumbnailSensitiveMetadata(tt.mimeType, tt.data))
+			require.Equal(t, tt.want, hasThumbnailSensitiveMetadata(tt.data))
 		})
 	}
 }

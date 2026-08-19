@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -21,6 +22,7 @@ import (
 
 	"github.com/usememos/memos/internal/motionphoto"
 	"github.com/usememos/memos/internal/profile"
+	"github.com/usememos/memos/internal/storage"
 	storepb "github.com/usememos/memos/proto/gen/store"
 	"github.com/usememos/memos/server/access"
 	"github.com/usememos/memos/server/auth"
@@ -29,11 +31,11 @@ import (
 
 // Constants for file serving configuration.
 const (
-	// ThumbnailCacheFolder is the folder name where thumbnail images are stored.
-	ThumbnailCacheFolder = ".thumbnail_cache"
+	// thumbnailCacheFolder is the folder name where thumbnail images are stored.
+	thumbnailCacheFolder = ".thumbnail_cache"
 
-	// MotionCacheFolder is the folder name where extracted motion clips are stored.
-	MotionCacheFolder = ".motion_cache"
+	// motionCacheFolder is the folder name where extracted motion clips are stored.
+	motionCacheFolder = ".motion_cache"
 
 	// thumbnailMaxSize is the maximum dimension (width or height) for thumbnails.
 	thumbnailMaxSize = 600
@@ -83,16 +85,6 @@ var avatarAllowedTypes = map[string]bool{
 	"image/webp": true,
 	"image/heic": true,
 	"image/heif": true,
-}
-
-// SupportedThumbnailMimeTypes is the exported list of thumbnail-supported MIME types.
-var SupportedThumbnailMimeTypes = []string{
-	"image/png",
-	"image/jpeg",
-	"image/jpg",
-	"image/heic",
-	"image/heif",
-	"image/webp",
 }
 
 var errUseOriginalForThumbnail = errors.New("serve original image instead of metadata-stripping thumbnail")
@@ -163,7 +155,7 @@ func (s *FileServerService) serveAttachmentFile(c *echo.Context) error {
 		return s.serveMotionClip(c, attachment)
 	}
 
-	contentType := s.sanitizeContentType(attachment.Type)
+	contentType := sanitizeContentType(attachment.Type)
 
 	// Stream video/audio to avoid loading entire file into memory.
 	if isMediaType(attachment.Type) {
@@ -191,7 +183,7 @@ func (s *FileServerService) serveUserAvatar(c *echo.Context) error {
 
 	identifier := c.Param("identifier")
 
-	user, err := s.getUserByUsername(ctx, identifier)
+	user, err := s.Store.GetUser(ctx, &store.FindUser{Username: &identifier})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user").Wrap(err)
 	}
@@ -202,7 +194,7 @@ func (s *FileServerService) serveUserAvatar(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "avatar not found")
 	}
 
-	imageType, imageData, err := s.parseDataURI(user.AvatarURL)
+	imageType, imageData, err := parseDataURI(user.AvatarURL)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to parse avatar data").Wrap(err)
 	}
@@ -212,7 +204,6 @@ func (s *FileServerService) serveUserAvatar(c *echo.Context) error {
 	}
 
 	setSecurityHeaders(c)
-	c.Response().Header().Set(echo.HeaderContentType, imageType)
 	c.Response().Header().Set(echo.HeaderCacheControl, cacheMaxAge)
 
 	return c.Blob(http.StatusOK, imageType, imageData)
@@ -229,19 +220,11 @@ func (s *FileServerService) serveMediaStream(c *echo.Context, attachment *store.
 
 	switch attachment.StorageType {
 	case storepb.AttachmentStorageType_LOCAL:
-		filePath, err := s.resolveLocalPath(attachment.Reference)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "failed to resolve file path").Wrap(err)
-		}
-		http.ServeFile(c.Response(), c.Request(), filePath)
+		http.ServeFile(c.Response(), c.Request(), s.resolveLocalPath(attachment.Reference))
 		return nil
 
 	case storepb.AttachmentStorageType_S3:
-		presignURL, err := s.getS3PresignedURL(c.Request().Context(), attachment)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "failed to generate presigned URL").Wrap(err)
-		}
-		return c.Redirect(http.StatusTemporaryRedirect, presignURL)
+		return s.streamS3Object(c, attachment, contentType)
 
 	default:
 		// Database storage fallback.
@@ -276,19 +259,10 @@ func (s *FileServerService) serveStaticFile(c *echo.Context, attachment *store.A
 
 	switch attachment.StorageType {
 	case storepb.AttachmentStorageType_LOCAL:
-		filePath, err := s.resolveLocalPath(attachment.Reference)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "failed to resolve file path").Wrap(err)
-		}
-		http.ServeFile(c.Response(), c.Request(), filePath)
+		http.ServeFile(c.Response(), c.Request(), s.resolveLocalPath(attachment.Reference))
 		return nil
 	case storepb.AttachmentStorageType_S3:
-		reader, err := s.getAttachmentReader(c.Request().Context(), attachment)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "failed to get attachment reader").Wrap(err)
-		}
-		defer reader.Close()
-		return c.Stream(http.StatusOK, contentType, reader)
+		return s.streamS3Object(c, attachment, contentType)
 	default:
 		return c.Blob(http.StatusOK, contentType, attachment.Blob)
 	}
@@ -299,28 +273,25 @@ func (s *FileServerService) serveStaticFile(c *echo.Context, attachment *store.A
 // =============================================================================
 
 // getAttachmentBlob retrieves the binary content of an attachment from storage.
-func (s *FileServerService) getAttachmentBlob(attachment *store.Attachment) ([]byte, error) {
-	switch attachment.StorageType {
-	case storepb.AttachmentStorageType_LOCAL:
-		return s.readLocalFile(attachment.Reference)
-
-	case storepb.AttachmentStorageType_S3:
-		return s.downloadFromS3(context.Background(), attachment)
-
-	default:
-		return attachment.Blob, nil
+func (s *FileServerService) getAttachmentBlob(ctx context.Context, attachment *store.Attachment) ([]byte, error) {
+	reader, err := s.getAttachmentReader(ctx, attachment)
+	if err != nil {
+		return nil, err
 	}
+	defer reader.Close()
+
+	blob, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to read attachment content")
+	}
+	return blob, nil
 }
 
 // getAttachmentReader returns a reader for streaming attachment content.
 func (s *FileServerService) getAttachmentReader(ctx context.Context, attachment *store.Attachment) (io.ReadCloser, error) {
 	switch attachment.StorageType {
 	case storepb.AttachmentStorageType_LOCAL:
-		filePath, err := s.resolveLocalPath(attachment.Reference)
-		if err != nil {
-			return nil, err
-		}
-		file, err := os.Open(filePath)
+		file, err := os.Open(s.resolveLocalPath(attachment.Reference))
 		if err != nil {
 			if os.IsNotExist(err) {
 				return nil, errors.Wrap(err, "file not found")
@@ -334,11 +305,11 @@ func (s *FileServerService) getAttachmentReader(ctx context.Context, attachment 
 		if err != nil {
 			return nil, err
 		}
-		reader, err := driver.GetObjectStream(ctx, s3Object.Key)
+		object, err := driver.GetObjectStream(ctx, s3Object.Key, "")
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to stream from S3")
 		}
-		return reader, nil
+		return object.Body, nil
 
 	default:
 		return io.NopCloser(bytes.NewReader(attachment.Blob)), nil
@@ -346,63 +317,66 @@ func (s *FileServerService) getAttachmentReader(ctx context.Context, attachment 
 }
 
 // resolveLocalPath converts a storage reference to an absolute file path.
-func (s *FileServerService) resolveLocalPath(reference string) (string, error) {
+func (s *FileServerService) resolveLocalPath(reference string) string {
 	filePath := filepath.FromSlash(reference)
 	if !filepath.IsAbs(filePath) {
 		filePath = filepath.Join(s.Profile.Data, filePath)
 	}
-	return filePath, nil
+	return filePath
 }
 
-// readLocalFile reads the entire contents of a local file.
-func (s *FileServerService) readLocalFile(reference string) ([]byte, error) {
-	filePath, err := s.resolveLocalPath(reference)
+// streamS3Object streams S3 content through the server, forwarding a supported
+// single Range so media players and document viewers can seek without a direct
+// S3 URL. Multipart ranges are ignored and served as a complete response
+// because S3 does not support multipart range responses.
+func (s *FileServerService) streamS3Object(c *echo.Context, attachment *store.Attachment, contentType string) error {
+	ctx := c.Request().Context()
+	driver, s3Object, err := s.Store.ResolveAttachmentS3Driver(ctx, attachment)
 	if err != nil {
-		return nil, err
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to resolve S3 attachment driver").Wrap(err)
 	}
 
-	file, err := os.Open(filePath)
+	object, err := driver.GetObjectStream(ctx, s3Object.Key, singleRangeHeader(c.Request().Header))
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, errors.Wrap(err, "file not found")
+		if errors.Is(err, storage.ErrRangeNotSatisfiable) {
+			h := c.Response().Header()
+			h.Set("Accept-Ranges", "bytes")
+			var rangeErr *storage.RangeNotSatisfiableError
+			if errors.As(err, &rangeErr) && rangeErr.ContentRange != "" {
+				h.Set("Content-Range", rangeErr.ContentRange)
+			}
+			return echo.NewHTTPError(http.StatusRequestedRangeNotSatisfiable, "requested range not satisfiable")
 		}
-		return nil, errors.Wrap(err, "failed to open file")
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to stream from S3").Wrap(err)
 	}
-	defer file.Close()
+	defer object.Body.Close()
 
-	blob, err := io.ReadAll(file)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to read file")
+	h := c.Response().Header()
+	h.Set("Accept-Ranges", "bytes")
+	if object.ContentLength >= 0 {
+		h.Set(echo.HeaderContentLength, strconv.FormatInt(object.ContentLength, 10))
 	}
-	return blob, nil
+	status := http.StatusOK
+	if object.ContentRange != "" {
+		h.Set("Content-Range", object.ContentRange)
+		status = http.StatusPartialContent
+	}
+	return c.Stream(status, contentType, object.Body)
 }
 
-// downloadFromS3 downloads the entire object from S3.
-func (s *FileServerService) downloadFromS3(ctx context.Context, attachment *store.Attachment) ([]byte, error) {
-	driver, s3Object, err := s.Store.ResolveAttachmentS3Driver(ctx, attachment)
-	if err != nil {
-		return nil, err
+// singleRangeHeader returns a Range value only when it contains one range.
+// Ignoring unsupported Range requests is permitted by HTTP and lets the caller
+// send the complete representation instead of relaying a request S3 rejects.
+func singleRangeHeader(header http.Header) string {
+	values := header.Values("Range")
+	if len(values) != 1 || strings.Contains(values[0], ",") {
+		return ""
 	}
-
-	blob, err := driver.GetObject(ctx, s3Object.Key)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to download from S3")
+	unit, ranges, ok := strings.Cut(values[0], "=")
+	if !ok || !strings.EqualFold(strings.TrimSpace(unit), "bytes") || strings.TrimSpace(ranges) == "" {
+		return ""
 	}
-	return blob, nil
-}
-
-// getS3PresignedURL generates a presigned URL for direct S3 access.
-func (s *FileServerService) getS3PresignedURL(ctx context.Context, attachment *store.Attachment) (string, error) {
-	driver, s3Object, err := s.Store.ResolveAttachmentS3Driver(ctx, attachment)
-	if err != nil {
-		return "", err
-	}
-
-	url, err := driver.PresignGetObject(ctx, s3Object.Key)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to presign URL")
-	}
-	return url, nil
+	return values[0]
 }
 
 // =============================================================================
@@ -418,7 +392,7 @@ func (s *FileServerService) getOrGenerateThumbnail(ctx context.Context, attachme
 	}
 
 	// Fast path: return cached thumbnail if exists.
-	if blob, err := s.readCachedThumbnail(thumbnailPath); err == nil {
+	if blob, err := os.ReadFile(thumbnailPath); err == nil {
 		return blob, nil
 	}
 
@@ -437,7 +411,7 @@ func (s *FileServerService) getOrGenerateThumbnail(ctx context.Context, attachme
 	defer s.thumbnailSemaphore.Release(1)
 
 	// Double-check after acquiring semaphore (another goroutine may have generated it).
-	if blob, err := s.readCachedThumbnail(thumbnailPath); err == nil {
+	if blob, err := os.ReadFile(thumbnailPath); err == nil {
 		return blob, nil
 	}
 
@@ -446,7 +420,7 @@ func (s *FileServerService) getOrGenerateThumbnail(ctx context.Context, attachme
 
 // getThumbnailPath returns the file path for a cached thumbnail.
 func (s *FileServerService) getThumbnailPath(attachment *store.Attachment) (string, error) {
-	cacheFolder := filepath.Join(s.Profile.Data, ThumbnailCacheFolder)
+	cacheFolder := filepath.Join(s.Profile.Data, thumbnailCacheFolder)
 	if err := os.MkdirAll(cacheFolder, os.ModePerm); err != nil {
 		return "", errors.Wrap(err, "failed to create thumbnail cache folder")
 	}
@@ -474,14 +448,10 @@ func (s *FileServerService) shouldUseOriginalForThumbnail(ctx context.Context, a
 		return false, errors.Wrap(err, "failed to read image metadata probe")
 	}
 
-	return hasThumbnailSensitiveMetadata(attachment.Type, probe), nil
+	return hasThumbnailSensitiveMetadata(probe), nil
 }
 
-func hasThumbnailSensitiveMetadata(mimeType string, data []byte) bool {
-	if mimeType == "image/heic" || mimeType == "image/heif" {
-		return true
-	}
-
+func hasThumbnailSensitiveMetadata(data []byte) bool {
 	for _, marker := range [][]byte{
 		[]byte("ICC_PROFILE"),
 		[]byte("iCCP"),
@@ -520,16 +490,6 @@ func hasThumbnailSensitiveMetadata(mimeType string, data []byte) bool {
 	return false
 }
 
-// readCachedThumbnail reads a thumbnail from the cache directory.
-func (*FileServerService) readCachedThumbnail(path string) ([]byte, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	return io.ReadAll(file)
-}
-
 // generateThumbnail creates a new thumbnail and saves it to disk.
 func (s *FileServerService) generateThumbnail(ctx context.Context, attachment *store.Attachment, thumbnailPath string) ([]byte, error) {
 	reader, err := s.getAttachmentReader(ctx, attachment)
@@ -548,17 +508,15 @@ func (s *FileServerService) generateThumbnail(ctx context.Context, attachment *s
 
 	thumbnailImage := imaging.Resize(img, thumbnailWidth, thumbnailHeight, imaging.Lanczos)
 
-	output, err := os.Create(thumbnailPath)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to create thumbnail file")
+	var buf bytes.Buffer
+	if err := imaging.Encode(&buf, thumbnailImage, imaging.JPEG, imaging.JPEGQuality(90)); err != nil {
+		return nil, errors.Wrap(err, "failed to encode thumbnail")
 	}
-	defer output.Close()
-
-	if err := imaging.Encode(output, thumbnailImage, imaging.JPEG, imaging.JPEGQuality(90)); err != nil {
+	if err := os.WriteFile(thumbnailPath, buf.Bytes(), 0644); err != nil {
 		return nil, errors.Wrap(err, "failed to save thumbnail")
 	}
 
-	return s.readCachedThumbnail(thumbnailPath)
+	return buf.Bytes(), nil
 }
 
 // calculateThumbnailDimensions calculates the target dimensions for a thumbnail.
@@ -592,17 +550,17 @@ func (s *FileServerService) serveMotionClip(c *echo.Context, attachment *store.A
 	return nil
 }
 
-func (s *FileServerService) getOrExtractMotionClip(_ context.Context, attachment *store.Attachment) ([]byte, error) {
+func (s *FileServerService) getOrExtractMotionClip(ctx context.Context, attachment *store.Attachment) ([]byte, error) {
 	motionPath, err := s.getMotionPath(attachment)
 	if err != nil {
 		return nil, err
 	}
 
-	if blob, err := s.readCachedThumbnail(motionPath); err == nil {
+	if blob, err := os.ReadFile(motionPath); err == nil {
 		return blob, nil
 	}
 
-	blob, err := s.getAttachmentBlob(attachment)
+	blob, err := s.getAttachmentBlob(ctx, attachment)
 	if err != nil {
 		return nil, err
 	}
@@ -620,7 +578,7 @@ func (s *FileServerService) getOrExtractMotionClip(_ context.Context, attachment
 }
 
 func (s *FileServerService) getMotionPath(attachment *store.Attachment) (string, error) {
-	cacheFolder := filepath.Join(s.Profile.Data, MotionCacheFolder)
+	cacheFolder := filepath.Join(s.Profile.Data, motionCacheFolder)
 	if err := os.MkdirAll(cacheFolder, os.ModePerm); err != nil {
 		return "", errors.Wrap(err, "failed to create motion cache folder")
 	}
@@ -712,17 +670,12 @@ func (s *FileServerService) getCurrentUser(ctx context.Context, c *echo.Context)
 	return s.authenticator.AuthenticateToUser(ctx, authHeader, cookieHeader)
 }
 
-// getUserByUsername finds a user by username only.
-func (s *FileServerService) getUserByUsername(ctx context.Context, identifier string) (*store.User, error) {
-	return s.Store.GetUser(ctx, &store.FindUser{Username: &identifier})
-}
-
 // =============================================================================
 // Helper Functions
 // =============================================================================
 
 // sanitizeContentType converts potentially dangerous MIME types to safe alternatives.
-func (*FileServerService) sanitizeContentType(mimeType string) string {
+func sanitizeContentType(mimeType string) string {
 	contentType := mimeType
 	if strings.HasPrefix(contentType, "text/") {
 		contentType += "; charset=utf-8"
@@ -735,7 +688,7 @@ func (*FileServerService) sanitizeContentType(mimeType string) string {
 }
 
 // parseDataURI extracts MIME type and decoded data from a data URI.
-func (*FileServerService) parseDataURI(dataURI string) (string, []byte, error) {
+func parseDataURI(dataURI string) (string, []byte, error) {
 	matches := dataURIRegex.FindStringSubmatch(dataURI)
 	if len(matches) != 3 {
 		return "", nil, errors.New("invalid data URI format")
