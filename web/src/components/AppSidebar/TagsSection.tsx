@@ -1,8 +1,16 @@
-import { HashIcon, ListIcon, ListTreeIcon } from "lucide-react";
+import { HashIcon, ListTreeIcon, MoreHorizontalIcon } from "lucide-react";
 import { forwardRef, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { replaceFiltersByFactor, stringifyFilters, useMemoFilterContext } from "@/contexts/MemoFilterContext";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useMemoFilterContext } from "@/contexts/MemoFilterContext";
 import { useLocalStorage, useOverflowTitle } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { useTranslate } from "@/utils/i18n";
@@ -14,17 +22,11 @@ import {
   sidebarRowStateAttributes,
   sidebarRowStateClasses,
 } from "./SidebarRow";
-import SidebarSection, {
-  SIDEBAR_SECTION_ACTION_ACTIVE_CLASSES,
-  SIDEBAR_SECTION_ACTION_BUTTON_CLASSES,
-  SIDEBAR_SECTION_ACTION_ICON_CLASSES,
-} from "./SidebarSection";
+import SidebarSection, { SIDEBAR_SECTION_ACTION_BUTTON_CLASSES, SIDEBAR_SECTION_ACTION_ICON_CLASSES } from "./SidebarSection";
 
 interface Props {
   tagCount: Record<string, number>;
   onSelect?: () => void;
-  /** When set, tag clicks land on this route with the tag filter instead of filtering the current one. */
-  navigationTarget?: string;
   /** Whose tags these are; keeps tree expansion state from bleeding between users and views. */
   scope: string;
 }
@@ -76,10 +78,9 @@ const FlatTagRow = ({ tag, amount, active, ariaLabel, onClick }: FlatTagRowProps
   );
 };
 
-const TagsSection = ({ tagCount, onSelect, navigationTarget, scope }: Props) => {
+const TagsSection = ({ tagCount, onSelect, scope }: Props) => {
   const t = useTranslate();
-  const navigate = useNavigate();
-  const { filters, setFilters, getFiltersByFactor, addFilter, removeFilter } = useMemoFilterContext();
+  const { getFiltersByFactor, addFilter, removeFilter } = useMemoFilterContext();
   const [treeMode, setTreeMode] = useLocalStorage<boolean>("tag-view-as-tree", false);
   const activeTags = new Set(getFiltersByFactor("tagSearch").map((filter) => filter.value));
   const activeTag = activeTags.values().next().value as string | undefined;
@@ -90,13 +91,6 @@ const TagsSection = ({ tagCount, onSelect, navigationTarget, scope }: Props) => 
   }
 
   const handleTagClick = (tag: string) => {
-    if (navigationTarget) {
-      const nextFilters = replaceFiltersByFactor(filters, "tagSearch", [{ factor: "tagSearch", value: tag }]);
-      setFilters(nextFilters);
-      navigate({ pathname: navigationTarget, search: `?filter=${stringifyFilters(nextFilters)}` });
-      onSelect?.();
-      return;
-    }
     const active = activeTags.has(tag);
     if (active) {
       removeFilter((filter) => filter.factor === "tagSearch" && filter.value === tag);
@@ -111,28 +105,42 @@ const TagsSection = ({ tagCount, onSelect, navigationTarget, scope }: Props) => 
     <SidebarSection
       label={t("common.tags")}
       action={
-        <div className="flex items-center gap-0.5" role="group" aria-label={t("common.tags")}>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={`${t("common.tags")}: ${t("memo.layout-list")}`}
-            aria-pressed={!treeMode}
-            className={cn(SIDEBAR_SECTION_ACTION_BUTTON_CLASSES, !treeMode && SIDEBAR_SECTION_ACTION_ACTIVE_CLASSES)}
-            onClick={() => setTreeMode(false)}
-          >
-            <ListIcon className={SIDEBAR_SECTION_ACTION_ICON_CLASSES} strokeWidth={1.8} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={`${t("common.tags")}: ${t("common.tree-mode")}`}
-            aria-pressed={treeMode}
-            className={cn(SIDEBAR_SECTION_ACTION_BUTTON_CLASSES, treeMode && SIDEBAR_SECTION_ACTION_ACTIVE_CLASSES)}
-            onClick={() => setTreeMode(true)}
-          >
-            <ListTreeIcon className={SIDEBAR_SECTION_ACTION_ICON_CLASSES} strokeWidth={1.8} />
-          </Button>
-        </div>
+        <DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>
+              <DropdownMenuTrigger
+                aria-label={`${t("common.tags")}: ${t("common.more")}`}
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    className={cn(
+                      SIDEBAR_SECTION_ACTION_BUTTON_CLASSES,
+                      "data-popup-open:bg-sidebar-accent data-popup-open:text-foreground",
+                    )}
+                  />
+                }
+              >
+                <MoreHorizontalIcon className={SIDEBAR_SECTION_ACTION_ICON_CLASSES} strokeWidth={1.8} />
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="top">{t("common.more")}</TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent align="end" sideOffset={4} size="sm" className="w-44">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="text-muted-foreground">{t("common.tags")}</DropdownMenuLabel>
+              <DropdownMenuCheckboxItem
+                checked={treeMode}
+                onCheckedChange={setTreeMode}
+                closeOnClick
+                className="ps-2 pe-7 [&>span]:start-auto [&>span]:end-2"
+              >
+                <ListTreeIcon className="text-muted-foreground" strokeWidth={1.8} />
+                {t("common.tree-mode")}
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       }
     >
       {treeMode ? (

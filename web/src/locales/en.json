@@ -216,7 +216,7 @@
     "tasks": "Tasks",
     "title": "Title",
     "today": "Today",
-    "tree-mode": "Tree mode",
+    "tree-mode": "Show as tree",
     "type": "Type",
     "unlink": "Unlink",
     "unpin": "Unpin",
@@ -237,6 +237,7 @@
     "any-thoughts": "Any thoughts...",
     "exit-focus-mode": "Exit Focus Mode",
     "focus-mode": "Focus Mode",
+    "comment": "Comment",
     "formatting-toolbar": "Formatting toolbar",
     "format": {
       "heading": "Heading",
@@ -272,7 +273,7 @@
     "new-memo": "New memo",
     "no-changes-detected": "No changes detected",
     "save": "Save",
-    "saving": "Saving...",
+    "saved": "Saved",
     "validation": {
       "cannot-save": "Cannot save",
       "content-required": "Content, attachment, or file required",
@@ -465,8 +466,12 @@
     "restored-successfully": "Restored successfully",
     "succeed-copy-content": "Content copied successfully.",
     "succeed-copy-link": "Link copied successfully.",
-    "update-succeed": "Update succeeded",
-    "user-not-found": "User not found"
+    "update-succeed": "Update succeeded"
+  },
+  "profile": {
+    "no-shared-memos": "@{{username}} hasn't shared any memos yet.",
+    "not-found-description": "There's no Memos user named @{{username}} on this instance.",
+    "not-found-title": "No one here"
   },
   "reference": {
     "add-references": "Add references",
@@ -514,6 +519,20 @@
   "router": {
     "back-to-top": "Back to Top",
     "go-to-home": "Go to Home"
+  },
+  "search": {
+    "access-error": "You don’t have access to these memos.",
+    "clear-query": "Clear query",
+    "edit-query": "Edit query",
+    "expression": "Search expression",
+    "expression-mode": "Expression",
+    "invalid-expression": "Search expression couldn’t be applied",
+    "keyboard-hint": "Enter to search · Shift+Enter for a new line",
+    "load-error": "Couldn’t load memos",
+    "mode": "Search mode",
+    "retry": "Retry",
+    "syntax-help": "Search syntax",
+    "text": "Text"
   },
   "setting": {
     "access-token": {
