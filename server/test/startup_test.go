@@ -45,6 +45,9 @@ type instanceOptions struct {
 	// a database without ACCESS, it is also the legacy compatibility input used
 	// to initialize that dedicated setting exactly once.
 	instanceURL string
+	// rateLimit enables the request rate limiter, which the other tests leave
+	// off so that their request volume never trips a budget.
+	rateLimit bool
 	// dataDir reuses an existing data directory instead of a fresh one, which
 	// is how a restart against an already-migrated database is simulated.
 	dataDir string
@@ -79,6 +82,7 @@ func bootInstance(ctx context.Context, t *testing.T, opts instanceOptions) *inst
 		Data:        dataDir,
 		Driver:      "sqlite",
 		InstanceURL: opts.instanceURL,
+		RateLimit:   opts.rateLimit,
 		Version:     version.GetCurrentVersion(),
 		Commit:      version.Commit,
 	}
@@ -291,7 +295,7 @@ func TestStartupServesEveryRegisteredRouter(t *testing.T) {
 
 	t.Run("mcp", func(t *testing.T) {
 		// A bare POST is enough to prove the handler is mounted; the MCP
-		// protocol itself is covered by server/router/mcp tests.
+		// protocol itself is covered by server/mcp tests.
 		status, _ := inst.do(t, http.MethodPost, "/mcp", "", map[string]any{
 			"jsonrpc": "2.0",
 			"id":      1,
