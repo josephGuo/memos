@@ -196,6 +196,7 @@
     "name": "Name",
     "next-month": "Next month",
     "nickname": "Nickname",
+    "open": "Open",
     "or": "or",
     "password": "Password",
     "pin": "Pin",
@@ -219,7 +220,6 @@
     "sign-up": "Sign up",
     "statistics": "Statistics",
     "tags": "Tags",
-    "tasks": "Tasks",
     "title": "Title",
     "today": "Today",
     "tree-mode": "Show as tree",
@@ -356,7 +356,6 @@
     "compact-mode": "Compact mode",
     "connections": "Connections",
     "grid-compact-hint": "Grid layouts always use compact cards.",
-    "go-to": "Go to {{source}}",
     "layout": "Layout",
     "layout-auto": "Auto",
     "layout-auto-description": "As many columns as fit the screen",
@@ -403,7 +402,6 @@
     "show-more": "Show more",
     "task-actions": {
       "check-all": "Check all tasks",
-      "title": "Tasks",
       "uncheck-all": "Uncheck all tasks",
       "updated": "Tasks updated"
     },
@@ -787,6 +785,7 @@
       "uploads-privacy-title": "Uploads & privacy"
     },
     "memo-view": {
+      "create": "Create view",
       "change-icon": "Change view icon",
       "delete-confirm": "Are you sure you want to delete view `{{title}}`?",
       "delete-success": "View `{{title}}` deleted successfully"

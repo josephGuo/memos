@@ -94,6 +94,7 @@
     "more": "Máis",
     "name": "Nome",
     "nickname": "Alcume",
+    "open": "Abrir",
     "or": "ou",
     "password": "Contrasinal",
     "pin": "Fixar",
@@ -127,7 +128,6 @@
     "yourself": "Ti",
     "empty-placeholder": "Baleiro",
     "unlink": "Desvincular",
-    "tasks": "Tarefas",
     "actions": "Accións",
     "collapse-panel": "Contraer panel",
     "expand-panel": "Expandir panel",
@@ -290,7 +290,6 @@
     "oldest-first": "Os máis vellos primeiro",
     "task-actions": {
       "check-all": "Comprobe todas as tarefas",
-      "title": "Tarefas",
       "uncheck-all": "Desmarque todas as tarefas",
       "updated": "Tarefas actualizadas"
     },
@@ -311,7 +310,6 @@
     "back-to": "Volver a {{source}}",
     "connections": "Conexións",
     "grid-compact-hint": "Os deseños de cuadrícula sempre usan tarxetas compactas.",
-    "go-to": "Ir a {{source}}",
     "layout": "Deseño",
     "layout-auto": "Automático",
     "layout-auto-description": "Tantas columnas como axusten á pantalla",
@@ -478,6 +476,7 @@
       "uploads-privacy-title": "Cargas e privacidade"
     },
     "memo-view": {
+      "create": "Crear vista",
       "delete-confirm": "Tes certeza de querer eliminar a vista `{{title}}`?",
       "delete-success": "Eliminouse correctamente a vista `{{title}}`",
       "change-icon": "Cambiar a icona da vista"

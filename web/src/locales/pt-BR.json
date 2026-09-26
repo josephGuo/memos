@@ -94,6 +94,7 @@
     "more": "Mais",
     "name": "Nome",
     "nickname": "Apelido",
+    "open": "Abrir",
     "or": "ou",
     "password": "Senha",
     "pin": "Fixar",
@@ -135,7 +136,6 @@
     "resize-panel": "Redimensionar painel",
     "resize-sidebar": "Redimensionar barra lateral",
     "sign-in-to-memos": "Entrar em Memos",
-    "tasks": "Tarefas",
     "unlink": "Desvincular",
     "view-all": "Ver tudo"
   },
@@ -298,7 +298,6 @@
     "count-memos-updated-in-date": "{{count}} {{memos}} atualizado em {{date}}",
     "connections": "Conexões",
     "grid-compact-hint": "Os layouts de grade sempre usam cartões compactos.",
-    "go-to": "Ir para {{source}}",
     "layout": "Layout",
     "layout-auto": "Automático",
     "layout-auto-description": "Quantas colunas couberem na tela",
@@ -312,7 +311,6 @@
     "parent-memo": "Memorando pai",
     "task-actions": {
       "check-all": "Verificar todas as tarefas",
-      "title": "Tarefas",
       "uncheck-all": "Desmarcar todas as tarefas",
       "updated": "Tarefas atualizadas"
     },
@@ -388,6 +386,7 @@
       "uploads-privacy-title": "Uploads e privacidade"
     },
     "memo-view": {
+      "create": "Criar visualização",
       "delete-confirm": "Tem certeza de que deseja excluir a vista `{{title}}`?",
       "delete-success": "Vista `{{title}}` excluída com sucesso",
       "change-icon": "Alterar ícone de visualização"

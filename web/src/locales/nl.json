@@ -94,6 +94,7 @@
     "more": "Meer",
     "name": "Naam",
     "nickname": "Bijnaam",
+    "open": "Openen",
     "or": "of",
     "password": "Wachtwoord",
     "pin": "Vastzetten",
@@ -127,7 +128,6 @@
     "yourself": "Jijzelf",
     "empty-placeholder": "Leeg",
     "unlink": "Ontkoppelen",
-    "tasks": "Taken",
     "actions": "Acties",
     "collapse-panel": "Paneel inklappen",
     "expand-panel": "Paneel uitklappen",
@@ -290,7 +290,6 @@
     "oldest-first": "Oudste eerst",
     "task-actions": {
       "check-all": "Controleer alle taken",
-      "title": "Taken",
       "uncheck-all": "Schakel alle taken uit",
       "updated": "Taken bijgewerkt"
     },
@@ -311,7 +310,6 @@
     "back-to": "Terug naar {{source}}",
     "connections": "Verbindingen",
     "grid-compact-hint": "Rasterindelingen gebruiken altijd compacte kaarten.",
-    "go-to": "Ga naar {{source}}",
     "layout": "Indeling",
     "layout-auto": "Automatisch",
     "layout-auto-description": "Zoveel kolommen als er op het scherm passen",
@@ -478,6 +476,7 @@
       "uploads-privacy-title": "Uploads en privacy"
     },
     "memo-view": {
+      "create": "Weergave maken",
       "delete-confirm": "Weet je zeker dat je weergave `{{title}}` wilt verwijderen?",
       "delete-success": "Weergave `{{title}}` succesvol verwijderd",
       "change-icon": "Weergavepictogram wijzigen"

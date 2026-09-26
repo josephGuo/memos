@@ -196,6 +196,7 @@
     "name": "Ad",
     "next-month": "Növbəti ay",
     "nickname": "Ləqəb",
+    "open": "Aç",
     "or": "və ya",
     "password": "Parol",
     "pin": "Sancaqla",
@@ -219,7 +220,6 @@
     "sign-up": "Qeydiyyatdan keç",
     "statistics": "Statistika",
     "tags": "Etiketlər",
-    "tasks": "Tapşırıqlar",
     "title": "Başlıq",
     "today": "Bu gün",
     "tree-mode": "Ağac şəklində göstər",
@@ -356,7 +356,6 @@
     "compact-mode": "Yığcam rejim",
     "connections": "Bağlantılar",
     "grid-compact-hint": "Şəbəkə düzülüşləri həmişə yığcam kartlardan istifadə edir.",
-    "go-to": "{{source}} bölməsinə keç",
     "layout": "Düzülüş",
     "layout-auto": "Avtomatik",
     "layout-auto-description": "Ekrana sığdığı qədər sütun",
@@ -403,7 +402,6 @@
     "show-more": "Daha çox göstər",
     "task-actions": {
       "check-all": "Bütün tapşırıqları işarələ",
-      "title": "Tapşırıqlar",
       "uncheck-all": "Bütün tapşırıqların işarəsini götür",
       "updated": "Tapşırıqlar yeniləndi"
     },
@@ -787,6 +785,7 @@
       "uploads-privacy-title": "Yükləmələr və məxfilik"
     },
     "memo-view": {
+      "create": "Görünüş yarat",
       "change-icon": "Görünüş ikonunu dəyiş",
       "delete-confirm": "`{{title}}` görünüşünü silmək istədiyinizə əminsiniz?",
       "delete-success": "`{{title}}` görünüşü silindi"

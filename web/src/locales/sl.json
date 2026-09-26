@@ -94,6 +94,7 @@
     "more": "Več",
     "name": "Ime",
     "nickname": "Nadimek",
+    "open": "Odpri",
     "or": "ali",
     "password": "Geslo",
     "pin": "Pripni",
@@ -127,7 +128,6 @@
     "yourself": "Ti",
     "empty-placeholder": "prazno",
     "unlink": "Prekini povezavo",
-    "tasks": "Naloge",
     "actions": "Dejanja",
     "collapse-panel": "Strni ploščo",
     "expand-panel": "Razširi ploščo",
@@ -290,7 +290,6 @@
     "oldest-first": "Najprej najstarejši",
     "task-actions": {
       "check-all": "Preverite vse naloge",
-      "title": "Naloge",
       "uncheck-all": "Odkljukajte vse naloge",
       "updated": "Naloge posodobljene"
     },
@@ -311,7 +310,6 @@
     "back-to": "Nazaj na {{source}}",
     "connections": "Povezave",
     "grid-compact-hint": "Mrežne postavitve vedno uporabljajo kompaktne kartice.",
-    "go-to": "Pojdi na {{source}}",
     "layout": "Postavitev",
     "layout-auto": "Samodejno",
     "layout-auto-description": "Toliko stolpcev, kolikor se prilega zaslonu",
@@ -478,6 +476,7 @@
       "uploads-privacy-title": "Nalaganja in zasebnost"
     },
     "memo-view": {
+      "create": "Ustvari pogled",
       "delete-confirm": "Ali ste prepričani, da želite izbrisati pogled \"{{title}}\"?",
       "delete-success": "Pogled \"{{title}}\" je uspešno izbrisan",
       "change-icon": "Spremeni ikono pogleda"

@@ -94,6 +94,7 @@
     "more": "More",
     "name": "Name",
     "nickname": "Nickname",
+    "open": "Open",
     "or": "or",
     "password": "Password",
     "pin": "Pin",
@@ -136,7 +137,6 @@
     "resize-panel": "Resize panel",
     "resize-sidebar": "Resize sidebar",
     "sign-in-to-memos": "Sign in to Memos",
-    "tasks": "Tasks",
     "view-all": "View all"
   },
   "locale-picker": {
@@ -290,7 +290,6 @@
     "oldest-first": "Oldest first",
     "task-actions": {
       "check-all": "Check all tasks",
-      "title": "Tasks",
       "uncheck-all": "Uncheck all tasks",
       "updated": "Tasks updated"
     },
@@ -310,7 +309,6 @@
     "back-to": "Back to {{source}}",
     "connections": "Connections",
     "grid-compact-hint": "Grid layouts always use compact cards.",
-    "go-to": "Go to {{source}}",
     "layout": "Layout",
     "layout-auto": "Auto",
     "layout-auto-description": "As many columns as fit the screen",
@@ -478,6 +476,7 @@
       "uploads-privacy-title": "Uploads & privacy"
     },
     "memo-view": {
+      "create": "Create view",
       "delete-confirm": "Are you sure you want to delete view `{{title}}`?",
       "delete-success": "View `{{title}}` deleted successfully",
       "change-icon": "Change view icon"

@@ -133,6 +133,7 @@
     "more": "Lisää",
     "name": "Nimi",
     "nickname": "Lempinimi",
+    "open": "Avaa",
     "or": "tai",
     "password": "Salasana",
     "pin": "Pin",
@@ -165,7 +166,6 @@
     "visibility": "Näkyvyys",
     "views": "Näkymät",
     "yourself": "itseäsi",
-    "tasks": "Tehtävät",
     "actions": "Toiminnot",
     "collapse-panel": "Pienennä paneeli",
     "expand-panel": "Laajenna paneeli",
@@ -318,7 +318,6 @@
     "show-more": "Näytä lisää",
     "task-actions": {
       "check-all": "Tarkista kaikki tehtävät",
-      "title": "Tehtävät",
       "uncheck-all": "Poista kaikkien tehtävien valinta",
       "updated": "Tehtävät päivitetty"
     },
@@ -349,7 +348,6 @@
     "back-to": "Takaisin kohtaan {{source}}",
     "connections": "Yhteydet",
     "grid-compact-hint": "Ruudukkoasetteluissa käytetään aina kompakteja kortteja.",
-    "go-to": "Siirry kohtaan {{source}}",
     "layout": "Asettelu",
     "layout-auto": "Automaattinen",
     "layout-auto-description": "Niin monta saraketta kuin näytölle mahtuu",
@@ -594,6 +592,7 @@
       "uploads-privacy-title": "Lataukset ja tietosuoja"
     },
     "memo-view": {
+      "create": "Luo näkymä",
       "delete-confirm": "Haluatko varmasti poistaa näkymän `{{title}}`?",
       "delete-success": "Näkymä `{{title}}` poistettu onnistuneesti",
       "change-icon": "Vaihda näkymäkuvaketta"

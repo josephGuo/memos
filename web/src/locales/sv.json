@@ -94,6 +94,7 @@
     "more": "Mer",
     "name": "Namn",
     "nickname": "Smeknamn",
+    "open": "Öppna",
     "or": "eller",
     "password": "Lösenord",
     "pin": "Fäst",
@@ -127,7 +128,6 @@
     "yourself": "Själv",
     "empty-placeholder": "Tömma",
     "unlink": "Ta bort länken",
-    "tasks": "Uppgifter",
     "actions": "Åtgärder",
     "collapse-panel": "Minimera panelen",
     "expand-panel": "Expandera panelen",
@@ -290,7 +290,6 @@
     "oldest-first": "Äldst först",
     "task-actions": {
       "check-all": "Kontrollera alla uppgifter",
-      "title": "Uppgifter",
       "uncheck-all": "Avmarkera alla uppgifter",
       "updated": "Uppgifter uppdaterade"
     },
@@ -311,7 +310,6 @@
     "back-to": "Tillbaka till {{source}}",
     "connections": "Anslutningar",
     "grid-compact-hint": "Rutnätslayouter använder alltid kompakta kort.",
-    "go-to": "Gå till {{source}}",
     "layout": "Layout",
     "layout-auto": "Auto",
     "layout-auto-description": "Så många kolumner som får plats på skärmen",
@@ -478,6 +476,7 @@
       "uploads-privacy-title": "Uppladdningar och sekretess"
     },
     "memo-view": {
+      "create": "Skapa vy",
       "delete-confirm": "Är du säker på att du vill ta bort vyn `{{title}}`?",
       "delete-success": "Vyn `{{title}}` raderades framgångsrikt",
       "change-icon": "Ändra vyikon"

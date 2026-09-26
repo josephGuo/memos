@@ -94,6 +94,7 @@
     "more": "Lainnya",
     "name": "Nama",
     "nickname": "Nama Panggilan",
+    "open": "Buka",
     "or": "atau",
     "password": "Kata sandi",
     "pin": "Jepit",
@@ -135,7 +136,6 @@
     "resize-panel": "Ubah ukuran panel",
     "resize-sidebar": "Ubah ukuran sidebar",
     "sign-in-to-memos": "Masuk ke Memos",
-    "tasks": "Tugas",
     "unlink": "Putuskan tautan",
     "view-all": "Lihat semua"
   },
@@ -298,7 +298,6 @@
     "count-memos-updated-in-date": "{{count}} {{memos}} diperbarui pada {{date}}",
     "connections": "Koneksi",
     "grid-compact-hint": "Tata letak grid selalu menggunakan kartu ringkas.",
-    "go-to": "Buka {{source}}",
     "layout": "Tata Letak",
     "layout-auto": "Otomatis",
     "layout-auto-description": "Sebanyak kolom yang sesuai dengan layar",
@@ -312,7 +311,6 @@
     "parent-memo": "Memo induk",
     "task-actions": {
       "check-all": "Centang semua tugas",
-      "title": "Tugas",
       "uncheck-all": "Hapus centang semua tugas",
       "updated": "Tugas diperbarui"
     },
@@ -388,6 +386,7 @@
       "uploads-privacy-title": "Unggahan & privasi"
     },
     "memo-view": {
+      "create": "Buat tampilan",
       "delete-confirm": "Apakah Anda yakin ingin menghapus tampilan `{{title}}`?",
       "delete-success": "Tampilan `{{title}}` berhasil dihapus",
       "change-icon": "Mengubah ikon tampilan"

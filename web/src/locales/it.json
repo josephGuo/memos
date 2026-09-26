@@ -94,6 +94,7 @@
     "more": "Altro",
     "name": "Nome",
     "nickname": "Nickname",
+    "open": "Apri",
     "or": "oppure",
     "password": "Password",
     "pin": "Fissa",
@@ -127,7 +128,6 @@
     "yourself": "Te stesso",
     "empty-placeholder": "Vuota",
     "unlink": "Scollega",
-    "tasks": "Compiti",
     "actions": "Azioni",
     "collapse-panel": "Comprimi pannello",
     "expand-panel": "Espandi pannello",
@@ -290,7 +290,6 @@
     "oldest-first": "Prima il più vecchio",
     "task-actions": {
       "check-all": "Controlla tutte le attività",
-      "title": "Compiti",
       "uncheck-all": "Deseleziona tutte le attività",
       "updated": "Attività aggiornate"
     },
@@ -311,7 +310,6 @@
     "back-to": "Torna a {{source}}",
     "connections": "Connessioni",
     "grid-compact-hint": "I layout a griglia utilizzano sempre schede compatte.",
-    "go-to": "Vai a {{source}}",
     "layout": "Layout",
     "layout-auto": "Automatico",
     "layout-auto-description": "Tante colonne quante ne possono entrare nello schermo",
@@ -478,6 +476,7 @@
       "uploads-privacy-title": "Caricamenti e privacy"
     },
     "memo-view": {
+      "create": "Crea vista",
       "delete-confirm": "Confermi di voler eliminare la vista `{{title}}`?",
       "delete-success": "Vista `{{title}}` eliminata con successo",
       "change-icon": "Cambia icona di visualizzazione"

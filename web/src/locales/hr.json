@@ -94,6 +94,7 @@
     "more": "Više",
     "name": "Ime",
     "nickname": "Nadimak",
+    "open": "Otvori",
     "or": "ili",
     "password": "Lozinka",
     "pin": "Prikvači",
@@ -127,7 +128,6 @@
     "yourself": "Ti",
     "empty-placeholder": "Prazan",
     "unlink": "Prekini vezu",
-    "tasks": "Zadaci",
     "actions": "Radnje",
     "collapse-panel": "Sažmi ploču",
     "expand-panel": "Proširi ploču",
@@ -290,7 +290,6 @@
     "oldest-first": "Prvo najstariji",
     "task-actions": {
       "check-all": "Provjerite sve zadatke",
-      "title": "Zadaci",
       "uncheck-all": "Odznačite sve zadatke",
       "updated": "Zadaci ažurirani"
     },
@@ -311,7 +310,6 @@
     "back-to": "Natrag na {{source}}",
     "connections": "Veze",
     "grid-compact-hint": "Mrežni rasporedi uvijek koriste kompaktne kartice.",
-    "go-to": "Idi na {{source}}",
     "layout": "Raspored",
     "layout-auto": "Automatski",
     "layout-auto-description": "Onoliko stupaca koliko stane na zaslon",
@@ -478,6 +476,7 @@
       "uploads-privacy-title": "Prijenosi i privatnost"
     },
     "memo-view": {
+      "create": "Stvori prikaz",
       "delete-confirm": "Jesi li siguran da želiš obrisati prikaz `{{title}}`?",
       "delete-success": "Prikaz `{{title}}` uspješno obrisan",
       "change-icon": "Promijeni ikonu prikaza"

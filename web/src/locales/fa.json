@@ -94,6 +94,7 @@
     "more": "بیشتر",
     "name": "نام",
     "nickname": "نام مستعار",
+    "open": "باز کردن",
     "or": "یا",
     "password": "گذرواژه",
     "pin": "نشان",
@@ -135,7 +136,6 @@
     "resize-panel": "تغییر اندازه پنل",
     "resize-sidebar": "تغییر اندازه نوار کناری",
     "sign-in-to-memos": "ورود به Memos",
-    "tasks": "وظایف",
     "unlink": "لغو پیوند",
     "view-all": "مشاهده همه"
   },
@@ -298,7 +298,6 @@
     "count-memos-updated-in-date": "{{count}} {{memos}} به‌روزرسانی شده در {{date}}",
     "connections": "اتصالات",
     "grid-compact-hint": "طرح‌بندی‌های شبکه‌ای همیشه از کارت‌های فشرده استفاده می‌کنند.",
-    "go-to": "برو به {{source}}",
     "layout": "طرح‌بندی",
     "layout-auto": "خودکار",
     "layout-auto-description": "به تعداد ستون‌هایی که صفحه نمایش را پر می‌کنند",
@@ -312,7 +311,6 @@
     "parent-memo": "یادداشت والد",
     "task-actions": {
       "check-all": "انتخاب همه وظایف",
-      "title": "وظایف",
       "uncheck-all": "انتخاب همه وظایف را بردارید",
       "updated": "وظایف به‌روزرسانی شدند"
     },
@@ -388,6 +386,7 @@
       "uploads-privacy-title": "آپلودها و حریم خصوصی"
     },
     "memo-view": {
+      "create": "ایجاد نما",
       "delete-confirm": "آیا مطمئن هستید که می‌خواهید نمای «{{title}}» را حذف کنید؟",
       "delete-success": "نمای «{{title}}» با موفقیت حذف شد",
       "change-icon": "تغییر نماد نمایش"

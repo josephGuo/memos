@@ -94,6 +94,7 @@
     "more": "Mehr",
     "name": "Name",
     "nickname": "Spitzname",
+    "open": "Öffnen",
     "or": "oder",
     "password": "Passwort",
     "pin": "Anpinnen",
@@ -127,7 +128,6 @@
     "yourself": "Du selbst",
     "empty-placeholder": "Leer",
     "unlink": "Verknüpfung aufheben",
-    "tasks": "Aufgaben",
     "actions": "Aktionen",
     "collapse-panel": "Bedienfeld ausblenden",
     "expand-panel": "Bedienfeld erweitern",
@@ -290,7 +290,6 @@
     "oldest-first": "Älteste zuerst",
     "task-actions": {
       "check-all": "Überprüfen Sie alle Aufgaben",
-      "title": "Aufgaben",
       "uncheck-all": "Deaktivieren Sie alle Aufgaben",
       "updated": "Aufgaben aktualisiert"
     },
@@ -311,7 +310,6 @@
     "back-to": "Zurück zu {{source}}",
     "connections": "Verbindungen",
     "grid-compact-hint": "Rasterlayouts verwenden immer kompakte Karten.",
-    "go-to": "Gehe zu {{source}}",
     "layout": "Layout",
     "layout-auto": "Automatisch",
     "layout-auto-description": "So viele Spalten, wie auf den Bildschirm passen",
@@ -478,6 +476,7 @@
       "uploads-privacy-title": "Uploads & Datenschutz"
     },
     "memo-view": {
+      "create": "Ansicht erstellen",
       "delete-confirm": "Bist du sicher, dass du die Ansicht `{{title}}` löschen möchtest?",
       "delete-success": "Ansicht `{{title}}` erfolgreich gelöscht",
       "change-icon": "Ansichtssymbol ändern"

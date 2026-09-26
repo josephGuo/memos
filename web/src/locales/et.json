@@ -133,6 +133,7 @@
     "more": "Rohkem",
     "name": "Nimi",
     "nickname": "Hüüdnimi",
+    "open": "Ava",
     "or": "või",
     "password": "Parool",
     "pin": "Pin",
@@ -165,7 +166,6 @@
     "visibility": "Nähtavus",
     "views": "Vaated",
     "yourself": "iseennast",
-    "tasks": "Ülesanded",
     "actions": "Toimingud",
     "collapse-panel": "Paneeli ahenda",
     "expand-panel": "Paneeli laiendamine",
@@ -318,7 +318,6 @@
     "show-more": "Näita rohkem",
     "task-actions": {
       "check-all": "Kontrollige kõiki ülesandeid",
-      "title": "Ülesanded",
       "uncheck-all": "Tühjendage kõigi ülesannete märge",
       "updated": "Ülesanded värskendatud"
     },
@@ -349,7 +348,6 @@
     "back-to": "Tagasi {{source}} juurde",
     "connections": "Ühendused",
     "grid-compact-hint": "Ruudustikupaigutused kasutavad alati kompaktseid kaarte.",
-    "go-to": "Mine {{source}} juurde",
     "layout": "Paigutus",
     "layout-auto": "Automaatne",
     "layout-auto-description": "Nii palju veerge kui ekraanile mahub",
@@ -594,6 +592,7 @@
       "uploads-privacy-title": "Üleslaadimised ja privaatsus"
     },
     "memo-view": {
+      "create": "Loo vaade",
       "delete-confirm": "Kas olete kindel, et soovite vaate `{{title}}` kustutada?",
       "delete-success": "Vaade `{{title}}` kustutati edukalt",
       "change-icon": "Muuda vaate ikooni"

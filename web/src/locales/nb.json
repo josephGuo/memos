@@ -94,6 +94,7 @@
     "more": "Mer",
     "name": "Navn",
     "nickname": "Kallenavn",
+    "open": "Åpne",
     "or": "eller",
     "password": "Passord",
     "pin": "Fest",
@@ -127,7 +128,6 @@
     "yourself": "Deg selv",
     "empty-placeholder": "Tømme",
     "unlink": "Fjern tilknytningen",
-    "tasks": "Oppgaver",
     "actions": "Handlinger",
     "collapse-panel": "Skjul panel",
     "expand-panel": "Utvid panel",
@@ -290,7 +290,6 @@
     "oldest-first": "Eldste først",
     "task-actions": {
       "check-all": "Sjekk alle oppgaver",
-      "title": "Oppgaver",
       "uncheck-all": "Fjern merket for alle oppgaver",
       "updated": "Oppgaver oppdatert"
     },
@@ -311,7 +310,6 @@
     "back-to": "Tilbake til {{source}}",
     "connections": "Tilkoblinger",
     "grid-compact-hint": "Rutenettoppsett bruker alltid kompakte kort.",
-    "go-to": "Gå til {{source}}",
     "layout": "Oppsett",
     "layout-auto": "Auto",
     "layout-auto-description": "Så mange kolonner som får plass på skjermen",
@@ -478,6 +476,7 @@
       "uploads-privacy-title": "Opplastinger og personvern"
     },
     "memo-view": {
+      "create": "Opprett visning",
       "delete-confirm": "Er du sikker på at du vil slette visningen `{{title}}`?",
       "delete-success": "Visning `{{title}}` slettet vellykket",
       "change-icon": "Endre visningsikon"

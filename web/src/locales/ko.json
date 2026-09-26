@@ -94,6 +94,7 @@
     "more": "더보기",
     "name": "이름",
     "nickname": "닉네임",
+    "open": "열기",
     "or": "또는",
     "password": "비밀번호",
     "pin": "고정",
@@ -135,7 +136,6 @@
     "resize-panel": "패널 크기 조정",
     "resize-sidebar": "사이드바 크기 조정",
     "sign-in-to-memos": "Memos에 로그인",
-    "tasks": "작업",
     "unlink": "연결 해제",
     "view-all": "모두 보기"
   },
@@ -298,7 +298,6 @@
     "count-memos-updated-in-date": "{{count}} {{memos}}이 {{date}}에 업데이트되었습니다.",
     "connections": "연결",
     "grid-compact-hint": "그리드 레이아웃은 항상 컴팩트 카드를 사용합니다.",
-    "go-to": "{{source}}으로 이동",
     "layout": "레이아웃",
     "layout-auto": "자동",
     "layout-auto-description": "화면에 맞는 열 개수",
@@ -312,7 +311,6 @@
     "parent-memo": "상위 메모",
     "task-actions": {
       "check-all": "모든 작업 선택",
-      "title": "작업",
       "uncheck-all": "모든 작업 선택 해제",
       "updated": "작업 업데이트됨"
     },
@@ -388,6 +386,7 @@
       "uploads-privacy-title": "업로드 및 개인 정보 보호"
     },
     "memo-view": {
+      "create": "뷰 만들기",
       "delete-confirm": "보기 `{{title}}`를 정말로 삭제하시겠습니까?",
       "delete-success": "보기 `{{title}}`가 성공적으로 삭제되었습니다",
       "change-icon": "뷰 아이콘 변경"

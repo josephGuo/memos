@@ -169,6 +169,7 @@
     "name": "שם",
     "next-month": "החודש הבא",
     "nickname": "כינוי",
+    "open": "פתח",
     "or": "או",
     "password": "סיסמה",
     "pin": "הצמד",
@@ -191,7 +192,6 @@
     "sign-up": "הרשמה",
     "statistics": "סטטיסטיקה",
     "tags": "תגיות",
-    "tasks": "משימות",
     "title": "כותרת",
     "today": "היום",
     "tree-mode": "מצב עץ",
@@ -360,7 +360,6 @@
     "show-more": "הצג עוד",
     "task-actions": {
       "check-all": "סמן את כל המשימות",
-      "title": "משימות",
       "uncheck-all": "בטל סימון של כל המשימות",
       "updated": "המשימות עודכנו"
     },
@@ -390,7 +389,6 @@
     },
     "back-to": "חזרה אל {{source}}",
     "connections": "חיבורים",
-    "go-to": "עבור אל {{source}}",
     "on-this-memo": "על תזכיר זה",
     "parent-memo": "תזכיר אב"
   },
@@ -627,6 +625,7 @@
       "uploads-privacy-title": "העלאות ופרטיות"
     },
     "memo-view": {
+      "create": "יצירת תצוגה",
       "delete-confirm": "האם אתם בטוחים שברצונכם למחוק את התצוגה `{{title}}`?",
       "delete-success": "התצוגה `{{title}}` נמחקה בהצלחה",
       "change-icon": "שינוי סמל התצוגה"

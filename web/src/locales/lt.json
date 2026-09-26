@@ -133,6 +133,7 @@
     "more": "Daugiau",
     "name": "Vardas",
     "nickname": "Slapyvardis",
+    "open": "Atidaryti",
     "or": "arba",
     "password": "Slaptažodis",
     "pin": "Smeigtukas",
@@ -165,7 +166,6 @@
     "visibility": "Matomumas",
     "views": "Rodiniai",
     "yourself": "save",
-    "tasks": "Užduotys",
     "actions": "Veiksmai",
     "collapse-panel": "Sutraukti skydelį",
     "expand-panel": "Išskleisti skydelį",
@@ -318,7 +318,6 @@
     "show-more": "Rodyti daugiau",
     "task-actions": {
       "check-all": "Patikrinkite visas užduotis",
-      "title": "Užduotys",
       "uncheck-all": "Panaikinkite visų užduočių žymėjimą",
       "updated": "Užduotys atnaujintos"
     },
@@ -349,7 +348,6 @@
     "back-to": "Atgal į {{source}}",
     "connections": "Ryšiai",
     "grid-compact-hint": "Tinklelio išdėstymuose visada naudojamos kompaktiškos kortelės.",
-    "go-to": "Eiti į {{source}}",
     "layout": "Išdėstymas",
     "layout-auto": "Automatinis",
     "layout-auto-description": "Tiek stulpelių, kiek telpa ekrane",
@@ -594,6 +592,7 @@
       "uploads-privacy-title": "Įkėlimai ir privatumas"
     },
     "memo-view": {
+      "create": "Sukurti rodinį",
       "delete-confirm": "Ar tikrai norite ištrinti rodinį `{{title}}`?",
       "delete-success": "Rodinys `{{title}}` sėkmingai ištrintas",
       "change-icon": "Keisti rodinio piktogramą"
