@@ -7,7 +7,7 @@ repo. If a fact here conflicts with source files or CI config, trust the source 
 
 Memos is a self-hosted note-taking app.
 
-- Backend: Go 1.27.2, Echo v5, Connect RPC, gRPC-Gateway, Protocol Buffers.
+- Backend: Go 1.27.2, net/http, Connect RPC, gRPC-Gateway, Protocol Buffers.
 - Frontend: React 19, TypeScript 7, Vite 8, Tailwind CSS v4, React Query v5.
 - Storage: SQLite, MySQL, PostgreSQL.
 - Generated API outputs: `proto/gen/` for Go/OpenAPI, `web/src/types/proto/` for TypeScript.
@@ -24,8 +24,9 @@ Memos is a self-hosted note-taking app.
 ## Documentation
 
 - ADRs and their companion glossary have been retired. Do not recreate them unless explicitly requested.
-- Design documents in `docs/design/` are frozen after implementation. Do not update implemented designs to track later code changes.
-- New and unimplemented designs may still evolve. Frozen documents record the original design; verify current behavior in source code and tests.
+- Design documents in `docs/design/` stay editable until the feature ships in a tagged release; keep a merged-but-unreleased design in step
+  with its implementation. After release the body is frozen: record later design changes in a dated `## Amendments` section at the end, never by
+  rewriting the body. See `docs/design/README.md`. Verify current behavior in source code and tests, not in design documents.
 - Brand copy (tagline, descriptions, README intro) comes verbatim from [`BRAND.md`](https://github.com/usememos/.github/blob/main/BRAND.md) in `usememos/.github`. Change it there first; do not keep brand guidelines in this repo.
 - Keep contributor guidance in this file and package-local `README.md` or `doc.go` files current when relevant code changes.
 
@@ -68,7 +69,7 @@ Every root folder is named for what it holds. Read the folder's `doc.go` or `REA
 | Path | Holds | May import |
 | --- | --- | --- |
 | `cmd/memos/` | Cobra/Viper CLI setup and server startup | anything |
-| `server/` | The HTTP process: Echo bootstrap, graceful shutdown, every transport | core, store, provider, markdown, filter, internal |
+| `server/` | The HTTP process: net/http bootstrap, graceful shutdown, every transport | core, store, provider, markdown, filter, internal |
 | `server/api/` | Connect/gRPC-Gateway services, ACL config, SSE hub. Thin handlers; rules go to `core/` | |
 | `server/fileserver/` | Native HTTP file serving, thumbnails, range requests | |
 | `server/frontend/` | Static SPA serving; `dist/` is the built SPA baked in by `go:embed` | |
